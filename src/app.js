@@ -6,6 +6,7 @@ const ContractController = require('./controller/contract.controller');
 const ContractService = require('./service/contract.service');
 const JobController = require('./controller/job.controller');
 const JobService = require('./service/job.service');
+const UserService = require('./service/user.service');
 const errorHandler = require('../src/helper/error');
 const app = express();
 app.use(bodyParser.json());
@@ -17,14 +18,14 @@ const { isClient } = require('./middleware/isClient');
 
 const contractService = new ContractService();
 const contractController = new ContractController(contractService);
-const jobService = new JobService();
+const userService = new UserService();
+const jobService = new JobService(userService);
 const jobController = new JobController(jobService);
 
 app.get('/contracts/:id', getProfile, contractController.getContractById);
-
 app.get('/contracts', getProfile, contractController.getUserContracts);
-
 app.get('/jobs/unpaid', getProfile, jobController.fetchUnpaidJobs);
+app.post('/jobs/:job_id/pay', getProfile, isClient, jobController.payForJob);
 
 app.use(errorHandler);
 

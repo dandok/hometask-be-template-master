@@ -1,8 +1,8 @@
 const { Op } = require('sequelize');
 const { Contract } = require('../model');
+const { HttpError } = require('../helper/httpError');
 
 function getContractById(id, userId) {
-  console.log('getContractById', { id, userId });
   try {
     return Contract.findOne({
       where: {
@@ -11,13 +11,11 @@ function getContractById(id, userId) {
       },
     });
   } catch (error) {
-    throw new Error(`Database error: ${error.message}`);
+    throw new HttpError(`Database error: ${error.message}`, 500);
   }
 }
 
 async function getUserContracts(userId) {
-  console.log('coming *******', userId);
-
   try {
     return Contract.findAll({
       where: {
@@ -31,8 +29,7 @@ async function getUserContracts(userId) {
       },
     });
   } catch (error) {
-    console.log('Error ********', error.message);
-    throw new Error(`Database error: ${error.message}`);
+    throw new HttpError(`Database error: ${error.message}`, 500);
   }
 }
 

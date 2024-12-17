@@ -1,3 +1,5 @@
+const { HttpStatusCode, type } = require('../helper/constants');
+
 const isClient = async (req, res, next) => {
   const profile = req.profile;
 

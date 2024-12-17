@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const { Job, Contract } = require('../model');
 
-function findUnpaidJobs(userId) {
+async function findUnpaidJobs(userId) {
   try {
     return Job.findAll({
       where: {
@@ -26,4 +26,28 @@ function findUnpaidJobs(userId) {
   }
 }
 
-module.exports = { findUnpaidJobs };
+async function findJobWithLock(jobId, userId, transaction) {
+  return Job.findOne({
+    where: { id: jobId },
+    include: [
+      {
+        model: Contract,
+        where: { ClientId: userId },
+      },
+    ],
+    lock: transaction.LOCK.UPDATE, // Lock row for update
+    transaction,
+  });
+}
+
+async function updateJobStatusToPaid(job, transaction) {
+  job.paid = true;
+  job.paymentDate = new Date();
+  await job.save({ transaction });
+}
+
+module.exports = {
+  findUnpaidJobs,
+  findJobWithLock,
+  updateJobStatusToPaid,
+};

@@ -13,12 +13,16 @@ class ContractController {
     try {
       const contract = await this.contractService.getContractById(id, userId);
       res.json({
-        status: 200,
+        statusCode: 200,
         message: 'Contract fetched successfully',
         data: contract,
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(error.statusCode).json({
+        statusCode: error.statusCode,
+        status: error.status,
+        error: error.message,
+      });
     }
   }
 
@@ -33,7 +37,11 @@ class ContractController {
         data: contracts,
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(error.statusCode).json({
+        statusCode: error.statusCode,
+        status: error.status,
+        error: error.message,
+      });
     }
   }
 
