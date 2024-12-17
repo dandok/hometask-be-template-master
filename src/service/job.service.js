@@ -2,10 +2,11 @@ const {
   findUnpaidJobs,
   findJobWithLock,
   updateJobStatusToPaid,
+  getBestProfession,
 } = require('../repository/jobs.repository');
-const Sequelize = require('sequelize');
 const sequelize = require('../model').sequelize;
 const { HttpError } = require('../helper/httpError');
+const { HttpStatusCode } = require('../helper/constants');
 class JobService {
   constructor(userService) {
     this.userService = userService;
@@ -20,7 +21,7 @@ class JobService {
         throw new HttpError('All active contracts have been paid for', 400);
 
       return unpaidJobs;
-    } catch (err) {
+    } catch (error) {
       throw err;
     }
   }
@@ -48,9 +49,6 @@ class JobService {
         ),
       ]);
 
-      console.log('Client Profile:', clientProfile); // Should log the client profile object
-      console.log('Contractor Profile:', contractorProfile);
-
       if (clientProfile.balance < amount)
         throw new HttpError('Insufficient balance', 400);
 
@@ -70,6 +68,22 @@ class JobService {
       return;
     } catch (error) {
       await transaction.rollback();
+      throw error;
+    }
+  }
+
+  async getBestProfession(start, end) {
+    if (start && end && new Date(start) > new Date(end)) {
+      throw new HttpError(
+        'Start date cannot be later than end date',
+        HttpStatusCode.BAD_REQUEST
+      );
+    }
+
+    try {
+      const result = await getBestProfession(start, end);
+      return result;
+    } catch (error) {
       throw error;
     }
   }

@@ -1,7 +1,6 @@
-const Sequelize = require('sequelize');
 const sequelize = require('../model').sequelize;
 const { Op } = require('sequelize');
-const { Job, Contract } = require('../model');
+const { Job, Contract, Profile } = require('../model');
 const { HttpError } = require('../helper/httpError');
 const { HttpStatusCode } = require('../helper/constants');
 
@@ -81,9 +80,63 @@ async function sumOfClientActiveJobs(userId) {
   }
 }
 
+async function getBestProfession(startDate, endDate) {
+  let whereClause = {};
+  let start = startDate ? new Date(startDate) : null;
+  let end = endDate ? new Date(endDate) : null;
+
+  if (start && end) {
+    whereClause.paymentDate = { [Op.gte]: start, [Op.lte]: end };
+  }
+
+  try {
+    const result = await Job.findAll({
+      attributes: [
+        [sequelize.fn('sum', sequelize.col('price')), 'totalEarnings'],
+        [sequelize.col('Contract.ContractorId'), 'ContractorId'],
+        [sequelize.col('Contract.Contractor.profession'), 'profession'],
+      ],
+      include: [
+        {
+          model: Contract,
+          attributes: [],
+          include: [
+            {
+              model: Profile,
+              attributes: [],
+              as: 'Contractor',
+            },
+          ],
+        },
+      ],
+      where: whereClause,
+      group: ['Contract.ContractorId'],
+      order: [[sequelize.fn('sum', sequelize.col('price')), 'DESC']],
+      limit: 1,
+    });
+
+    if (!result || !result.length)
+      throw new HttpError(
+        'No data found for the specified time range',
+        HttpStatusCode.NOT_FOUND
+      );
+
+    const bestProfession = result[0].dataValues.profession;
+    const totalEarnings = result[0].dataValues.totalEarnings;
+
+    return { profession: bestProfession, totalEarnings };
+  } catch (error) {
+    throw new HttpError(
+      `Database Error: ${error.message}`,
+      HttpStatusCode.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
 module.exports = {
   findUnpaidJobs,
   findJobWithLock,
   updateJobStatusToPaid,
   sumOfClientActiveJobs,
+  getBestProfession,
 };

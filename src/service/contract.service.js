@@ -13,8 +13,8 @@ class ContractService {
       }
 
       return contract;
-    } catch (err) {
-      throw new Error(`Failed to retrieve contract: ${err.message}`);
+    } catch (error) {
+      throw new Error(`Failed to retrieve contract: ${error.message}`);
     }
   }
 
@@ -27,8 +27,8 @@ class ContractService {
         throw new Error('No contracts found for this user');
 
       return contracts;
-    } catch (err) {
-      throw new Error(`Failed to retrieve contracts: ${err.message}`);
+    } catch (error) {
+      throw new Error(`Failed to retrieve contracts: ${error.message}`);
     }
   }
 

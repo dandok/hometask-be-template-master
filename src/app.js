@@ -16,6 +16,7 @@ app.set('models', sequelize.models);
 
 const { Op } = require('sequelize');
 const { isClient } = require('./middleware/isClient');
+const { isContractor } = require('./middleware/isContractor');
 
 const contractService = new ContractService();
 const contractController = new ContractController(contractService);
@@ -33,6 +34,12 @@ app.post(
   getProfile,
   isClient,
   userController.deposit
+);
+app.get(
+  '/admin/best-profession',
+  getProfile,
+  isContractor,
+  jobController.bestProfession
 );
 
 app.use(errorHandler);
