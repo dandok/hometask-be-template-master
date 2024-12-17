@@ -6,7 +6,7 @@ class JobController {
     this.payForJob = this.payForJob.bind(this);
   }
 
-  async fetchUnpaidJobs(req, res) {
+  async fetchUnpaidJobs(req, res, next) {
     const userId = req.profile.id; // Assuming profile is set via getProfile middleware
 
     try {
@@ -16,15 +16,11 @@ class JobController {
         data: await this.jobService.getUnpaidJobs(userId),
       });
     } catch (error) {
-      res.status(error.statusCode).json({
-        statusCode: error.statusCode,
-        status: error.status,
-        error: error.message,
-      });
+      next(error);
     }
   }
 
-  async payForJob(req, res) {
+  async payForJob(req, res, next) {
     const userId = req.profile.id;
     const { job_id } = req.params;
     const { amount } = req.body;
@@ -36,11 +32,7 @@ class JobController {
         data: await this.jobService.payForJob(job_id, amount, userId),
       });
     } catch (error) {
-      res.status(error.statusCode).json({
-        statusCode: error.statusCode,
-        status: error.status,
-        error: error.message,
-      });
+      next(error);
     }
   }
 }

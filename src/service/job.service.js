@@ -27,6 +27,9 @@ class JobService {
 
   async payForJob(id, amount, userId) {
     this.validateUser(userId);
+    if (amount <= 0)
+      throw new HttpError('Amount must be greater than zero', 400);
+
     const transaction = await this.sequelize.transaction();
 
     try {
@@ -35,6 +38,8 @@ class JobService {
       if (job.paid)
         throw new HttpError(`Job with id: ${job.id} has been paid`, 400);
 
+      console.log(job);
+
       const [clientProfile, contractorProfile] = await Promise.all([
         this.userService.findClientProfile(job.Contract.ClientId, transaction),
         this.userService.findContractorProfile(
@@ -42,6 +47,9 @@ class JobService {
           transaction
         ),
       ]);
+
+      console.log('Client Profile:', clientProfile); // Should log the client profile object
+      console.log('Contractor Profile:', contractorProfile);
 
       if (clientProfile.balance < amount)
         throw new HttpError('Insufficient balance', 400);

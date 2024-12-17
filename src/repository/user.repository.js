@@ -9,18 +9,25 @@ async function findContractorProfileWithLock(contractorId, transaction) {
 }
 
 async function findClientProfileWithLock(clientId, transaction) {
-  await Profile.findOne({
+  return Profile.findOne({
     where: { id: clientId },
     lock: transaction.LOCK.UPDATE,
     transaction,
   });
 }
 
-async function updateClientBalance(clientId, amount, transaction) {
+async function updateClientBalance(
+  clientId,
+  amount,
+  transaction = null,
+  isDeposit = false
+) {
+  const balanceChange = isDeposit ? amount : -amount; // If it's a deposit, add the amount; otherwise, subtract it
+
   await Profile.increment('balance', {
-    by: -amount,
+    by: balanceChange,
     where: { id: clientId },
-    transaction,
+    ...(transaction && { transaction }), // Add the transaction if it exists
   });
 }
 
