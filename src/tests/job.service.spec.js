@@ -2,6 +2,14 @@ const JobService = require('../service/job.service');
 const { HttpError } = require('../helper/httpError');
 const { HttpStatusCode } = require('../helper/constants');
 
+const {
+  findUnpaidJobs,
+  findJobWithLock,
+  updateJobStatusToPaid,
+  getBestProfession,
+  getBestClients,
+} = require('../repository/jobs.repository');
+
 jest.mock('../repository/jobs.repository', () => ({
   findUnpaidJobs: jest.fn(),
   findJobWithLock: jest.fn(),
@@ -28,14 +36,6 @@ jest.mock('../helper/httpError', () => ({
     }
   },
 }));
-
-const {
-  findUnpaidJobs,
-  findJobWithLock,
-  updateJobStatusToPaid,
-  getBestProfession,
-  getBestClients,
-} = require('../repository/jobs.repository');
 
 describe('JobService', () => {
   let jobService;
@@ -136,7 +136,7 @@ describe('JobService', () => {
         expect(error).toBeDefined();
         expect(error).toBeInstanceOf(HttpError);
         expect(error.message).toBe(`Job with id: ${jobId} has been paid`);
-        expect(error.statusCode).toBe(400);
+        expect(error.statusCode).toBe(HttpStatusCode.BAD_REQUEST);
       }
     });
 
@@ -162,7 +162,7 @@ describe('JobService', () => {
         expect(error).toBeDefined();
         expect(error).toBeInstanceOf(HttpError);
         expect(error.message).toBe('Insufficient balance');
-        expect(error.statusCode).toBe(400);
+        expect(error.statusCode).toBe(HttpStatusCode.BAD_REQUEST);
       }
     });
   });
