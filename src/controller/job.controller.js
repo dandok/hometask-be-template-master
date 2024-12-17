@@ -7,6 +7,7 @@ class JobController {
     this.fetchUnpaidJobs = this.fetchUnpaidJobs.bind(this);
     this.payForJob = this.payForJob.bind(this);
     this.bestProfession = this.bestProfession.bind(this);
+    this.bestClients = this.bestClients.bind(this);
   }
 
   async fetchUnpaidJobs(req, res, next) {
@@ -14,7 +15,7 @@ class JobController {
 
     try {
       res.json({
-        statusCode: 200, //use httpstatuses
+        statusCode: HttpStatusCode.OK,
         message: 'Unpaid jobs fetched successfully',
         data: await this.jobService.getUnpaidJobs(userId),
       });
@@ -30,7 +31,7 @@ class JobController {
 
     try {
       res.json({
-        statusCode: 200, //use httpstatuses
+        statusCode: HttpStatusCode.OK,
         message: 'Job paid for successfully',
         data: await this.jobService.payForJob(job_id, amount, userId),
       });
@@ -47,6 +48,20 @@ class JobController {
         statusCode: HttpStatusCode.OK,
         message: 'Best profession fetched successfully',
         data: await this.jobService.getBestProfession(start, end),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async bestClients(req, res, next) {
+    const { start, end, limit } = req.query;
+
+    try {
+      res.json({
+        statusCode: HttpStatusCode.OK,
+        message: 'Best clients fetched successfully',
+        data: await this.jobService.bestClients(start, end, limit),
       });
     } catch (error) {
       next(error);

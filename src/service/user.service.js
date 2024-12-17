@@ -34,7 +34,6 @@ class UserService {
   }
 
   async deposit(userId, amount) {
-    this.validateUser(userId);
     if (amount <= 0)
       throw new HttpError(
         'Amount must be greater than zero',
@@ -61,12 +60,6 @@ class UserService {
     } catch (error) {
       throw error;
     }
-  }
-
-  validateUser(userId) {
-    if (!userId) throw HttpError('invalid user', HttpStatusCode.BAD_REQUEST);
-    if (!Number.isInteger(userId)) throw new Error('invalid user id');
-    return;
   }
 }
 

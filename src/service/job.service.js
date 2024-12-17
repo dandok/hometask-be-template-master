@@ -3,6 +3,7 @@ const {
   findJobWithLock,
   updateJobStatusToPaid,
   getBestProfession,
+  getBestClients,
 } = require('../repository/jobs.repository');
 const sequelize = require('../model').sequelize;
 const { HttpError } = require('../helper/httpError');
@@ -14,7 +15,6 @@ class JobService {
   }
 
   async getUnpaidJobs(userId) {
-    this.validateUser(userId); //manage this validation better
     try {
       const unpaidJobs = await findUnpaidJobs(userId);
       if (unpaidJobs.length === 0)
@@ -22,12 +22,11 @@ class JobService {
 
       return unpaidJobs;
     } catch (error) {
-      throw err;
+      throw error;
     }
   }
 
   async payForJob(id, amount, userId) {
-    this.validateUser(userId);
     if (amount <= 0)
       throw new HttpError('Amount must be greater than zero', 400);
 
@@ -38,8 +37,6 @@ class JobService {
       if (!job) throw new HttpError('Job not found', 404);
       if (job.paid)
         throw new HttpError(`Job with id: ${job.id} has been paid`, 400);
-
-      console.log(job);
 
       const [clientProfile, contractorProfile] = await Promise.all([
         this.userService.findClientProfile(job.Contract.ClientId, transaction),
@@ -73,25 +70,42 @@ class JobService {
   }
 
   async getBestProfession(start, end) {
+    JobService.validateRange(start, end);
+
+    try {
+      return getBestProfession(start, end);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async bestClients(start, end, limit = 2) {
+    JobService.validateRange(start, end);
+    JobService.validateLimit(limit);
+
+    try {
+      return getBestClients(start, end, parseInt(limit, 10));
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static validateLimit(limit) {
+    if (!Number.isInteger(Number(limit)) || Number(limit) <= 0) {
+      throw new HttpError(
+        'Invalid limit value. Limit should be a positive integer.',
+        HttpStatusCode.BAD_REQUEST
+      );
+    }
+  }
+
+  static validateRange(start, end) {
     if (start && end && new Date(start) > new Date(end)) {
       throw new HttpError(
         'Start date cannot be later than end date',
         HttpStatusCode.BAD_REQUEST
       );
     }
-
-    try {
-      const result = await getBestProfession(start, end);
-      return result;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  validateUser(userId) {
-    if (!userId) throw HttpError('invalid user', 400);
-    if (!Number.isInteger(userId)) throw new Error('invalid user id');
-    return;
   }
 }
 

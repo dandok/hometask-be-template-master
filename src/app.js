@@ -38,9 +38,10 @@ app.post(
 app.get(
   '/admin/best-profession',
   getProfile,
-  isContractor,
+  isContractor, //should this really be contractor
   jobController.bestProfession
 );
+app.get('/admin/best-clients', getProfile, isClient, jobController.bestClients);
 
 app.use(errorHandler);
 

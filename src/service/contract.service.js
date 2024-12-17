@@ -5,7 +5,6 @@ const {
 
 class ContractService {
   async getContractById(id, userId) {
-    this.validateUser(userId);
     try {
       const contract = getContractById(id, userId);
       if (!contract) {
@@ -19,7 +18,6 @@ class ContractService {
   }
 
   async getContracts(userId) {
-    this.validateUser(userId);
     try {
       const contracts = await getUserContracts(userId);
 
@@ -30,12 +28,6 @@ class ContractService {
     } catch (error) {
       throw new Error(`Failed to retrieve contracts: ${error.message}`);
     }
-  }
-
-  validateUser(userId) {
-    if (!userId) throw Error('invalid user');
-    if (!Number.isInteger(userId)) throw new Error('invalid user id');
-    return;
   }
 }
 
