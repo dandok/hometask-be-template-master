@@ -56,7 +56,8 @@ class UserService {
           HttpStatusCode.BAD_REQUEST
         );
 
-      return await this.updateClientBalance(userId, amount, null, true);
+      await this.updateClientBalance(userId, amount, null, true);
+      return maxAllowedDeposit;
     } catch (error) {
       throw error;
     }

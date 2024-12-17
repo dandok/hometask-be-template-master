@@ -9,12 +9,12 @@ class UserController {
   async deposit(req, res, next) {
     const userId = req.profile.id;
     const { amount } = req.body;
+    await this.userService.deposit(userId, amount);
 
     try {
       res.json({
         statusCode: HttpStatusCode.OK,
         message: 'Deposit done successfully',
-        data: await this.userService.deposit(userId, amount),
       });
     } catch (error) {
       next(error);
