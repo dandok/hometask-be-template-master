@@ -18,7 +18,10 @@ class JobService {
     try {
       const unpaidJobs = await findUnpaidJobs(userId);
       if (unpaidJobs.length === 0)
-        throw new HttpError('All active contracts have been paid for', 400);
+        throw new HttpError(
+          'All active contracts have been paid for',
+          HttpStatusCode.BAD_REQUEST
+        );
 
       return unpaidJobs;
     } catch (error) {
@@ -34,9 +37,12 @@ class JobService {
 
     try {
       const job = await findJobWithLock(id, userId, transaction);
-      if (!job) throw new HttpError('Job not found', 404);
+      if (!job) throw new HttpError('Job not found', HttpStatusCode.NOT_FOUND);
       if (job.paid)
-        throw new HttpError(`Job with id: ${job.id} has been paid`, 400);
+        throw new HttpError(
+          `Job with id: ${job.id} has been paid`,
+          HttpStatusCode.BAD_REQUEST
+        );
 
       const [clientProfile, contractorProfile] = await Promise.all([
         this.userService.findClientProfile(job.Contract.ClientId, transaction),
@@ -47,7 +53,7 @@ class JobService {
       ]);
 
       if (clientProfile.balance < amount)
-        throw new HttpError('Insufficient balance', 400);
+        throw new HttpError('Insufficient balance', HttpStatusCode.BAD_REQUEST);
 
       await this.userService.updateClientBalance(
         clientProfile.id,

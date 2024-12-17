@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { Contract } = require('../model');
 const { HttpError } = require('../helper/httpError');
+const { HttpStatusCode } = require('../helper/constants');
 
 function getContractById(id, userId) {
   try {
@@ -11,7 +12,10 @@ function getContractById(id, userId) {
       },
     });
   } catch (error) {
-    throw new HttpError(`Database error: ${error.message}`, 500);
+    throw new HttpError(
+      `Database error: ${error.message}`,
+      HttpStatusCode.INTERNAL_SERVER_ERROR
+    );
   }
 }
 
@@ -19,17 +23,17 @@ async function getUserContracts(userId) {
   try {
     return Contract.findAll({
       where: {
-        [Op.or]: [
-          { ClientId: userId }, // Check if the user is the client
-          { ContractorId: userId }, // Check if the user is the contractor
-        ],
+        [Op.or]: [{ ClientId: userId }, { ContractorId: userId }],
         status: {
-          [Op.ne]: 'terminated', // Exclude contracts with status 'terminated'
+          [Op.ne]: 'terminated',
         },
       },
     });
   } catch (error) {
-    throw new HttpError(`Database error: ${error.message}`, 500);
+    throw new HttpError(
+      `Database error: ${error.message}`,
+      HttpStatusCode.INTERNAL_SERVER_ERROR
+    );
   }
 }
 

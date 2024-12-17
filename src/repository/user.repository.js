@@ -22,12 +22,12 @@ async function updateClientBalance(
   transaction = null,
   isDeposit = false
 ) {
-  const balanceChange = isDeposit ? amount : -amount; // If it's a deposit, add the amount; otherwise, subtract it
+  const balanceChange = isDeposit ? amount : -amount;
 
   await Profile.increment('balance', {
     by: balanceChange,
     where: { id: clientId },
-    ...(transaction && { transaction }), // Add the transaction if it exists
+    ...(transaction && { transaction }),
   });
 }
 

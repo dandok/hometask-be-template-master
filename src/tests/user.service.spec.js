@@ -1,10 +1,5 @@
 const UserService = require('../service/user.service');
-const {
-  findClientProfileWithLock,
-  findContractorProfileWithLock,
-  updateClientBalance,
-  updateContractorBalance,
-} = require('../repository/user.repository');
+const { updateClientBalance } = require('../repository/user.repository');
 const { sumOfClientActiveJobs } = require('../repository/jobs.repository');
 const { HttpError } = require('../helper/httpError');
 const {
@@ -12,7 +7,6 @@ const {
   MAX_ALLOWED_PERCENTAGE,
 } = require('../helper/constants');
 
-// Mock the repository functions
 jest.mock('../repository/user.repository', () => ({
   findClientProfileWithLock: jest.fn(),
   findContractorProfileWithLock: jest.fn(),
@@ -53,7 +47,6 @@ describe('UserService', () => {
     const userId = 1;
     const amount = 100;
 
-    // Mock sumOfClientActiveJobs to return 0 (no active contracts)
     sumOfClientActiveJobs.mockResolvedValue(0);
 
     try {

@@ -1,3 +1,5 @@
+const { HttpStatusCode } = require('../helper/constants');
+
 class ContractController {
   constructor(contractService) {
     this.contractService = contractService;
@@ -6,42 +8,34 @@ class ContractController {
     this.getUserContracts = this.getUserContracts.bind(this);
   }
 
-  async getContractById(req, res) {
+  async getContractById(req, res, next) {
     const { id } = req.params;
     const userId = req.profile.id;
 
     try {
       const contract = await this.contractService.getContractById(id, userId);
       res.json({
-        statusCode: 200,
+        statusCode: HttpStatusCode.OK,
         message: 'Contract fetched successfully',
         data: contract,
       });
     } catch (error) {
-      res.status(error.statusCode).json({
-        statusCode: error.statusCode,
-        status: error.status,
-        error: error.message,
-      });
+      next(error);
     }
   }
 
-  async getUserContracts(req, res) {
+  async getUserContracts(req, res, next) {
     const userId = req.profile.id;
 
     try {
       const contracts = await this.contractService.getContracts(userId);
       res.json({
-        status: 200,
+        status: HttpStatusCode.OK,
         message: 'Contracts retrieved successfully',
         data: contracts,
       });
     } catch (error) {
-      res.status(error.statusCode).json({
-        statusCode: error.statusCode,
-        status: error.status,
-        error: error.message,
-      });
+      next(error);
     }
   }
 

@@ -25,7 +25,10 @@ async function findUnpaidJobs(userId) {
       },
     });
   } catch (error) {
-    throw new Error(`Error fetching unpaid jobs: ${error.message}`);
+    throw new Error(
+      `Error fetching unpaid jobs: ${error.message}`,
+      HttpStatusCode.INTERNAL_SERVER_ERROR
+    );
   }
 }
 
