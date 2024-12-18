@@ -38,7 +38,7 @@ app.post(
 app.get(
   '/admin/best-profession',
   getProfile,
-  isContractor, //should this really be contractor
+  isContractor,
   jobController.bestProfession
 );
 app.get('/admin/best-clients', getProfile, isClient, jobController.bestClients);
