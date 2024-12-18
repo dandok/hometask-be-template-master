@@ -63,7 +63,6 @@ describe('UserService', () => {
     const userId = 1;
     const amount = 200;
 
-    // Mock sumOfClientActiveJobs to return 100 (active contracts exist)
     sumOfClientActiveJobs.mockResolvedValue(100);
     const maxAllowedDeposit = 100 * MAX_ALLOWED_PERCENTAGE;
 
@@ -81,12 +80,10 @@ describe('UserService', () => {
 
   it('should update client balance if the deposit is valid', async () => {
     const userId = 1;
-    const amount = 20; // Change from 50 to 20
+    const amount = 20;
 
-    // Mock sumOfClientActiveJobs to return 100 (active contracts exist)
     sumOfClientActiveJobs.mockResolvedValue(100);
 
-    // Mock updateClientBalance to resolve successfully
     updateClientBalance.mockResolvedValue(true);
 
     const result = await userService.deposit(userId, amount);
