@@ -103,5 +103,5 @@ Thank you and good luck! 🙏
 
    Extras
 3. A few tests written
-4. A postman collection created from documentation purposes
+4. A postman collection created for documentation purposes
 https://documenter.getpostman.com/view/37806716/2sAYJ1jhAS
