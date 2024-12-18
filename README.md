@@ -96,3 +96,12 @@ It would be great for example if you'd write some unit test / simple frontend de
 When you have finished the assignment, zip your repo (make sure to include .git folder) and send us the zip.
 
 Thank you and good luck! 🙏
+
+## What was done
+1. 6 new API's were created 
+2. 1 API was corrected
+
+   Extras
+3. A few tests written
+4. A postman collection created from documentation purposes
+https://documenter.getpostman.com/view/37806716/2sAYJ1jhAS
