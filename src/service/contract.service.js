@@ -8,13 +8,13 @@ const {
 class ContractService {
   async getContractById(id, userId) {
     try {
-      const contract = getContractById(id, userId);
+      const contract = await getContractById(id, userId);
       if (!contract)
         throw new HttpError('Contract not found', HttpStatusCode.NOT_FOUND);
 
       return contract;
     } catch (error) {
-      throw error;
+      throw new HttpError(error.message, error.statusCode);
     }
   }
 
@@ -30,7 +30,7 @@ class ContractService {
 
       return contracts;
     } catch (error) {
-      throw error;
+      throw new HttpError(error.message, error.statusCode);
     }
   }
 }

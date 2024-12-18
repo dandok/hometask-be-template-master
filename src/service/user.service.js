@@ -34,11 +34,7 @@ class UserService {
   }
 
   async deposit(userId, amount) {
-    if (amount <= 0)
-      throw new HttpError(
-        'Amount must be greater than zero',
-        HttpStatusCode.BAD_REQUEST
-      );
+    UserService.validateAmount(amount);
 
     try {
       const sumOfActiveJobs = await sumOfClientActiveJobs(userId);
@@ -56,10 +52,29 @@ class UserService {
           HttpStatusCode.BAD_REQUEST
         );
 
-      await this.updateClientBalance(userId, amount, null, true);
+      await updateClientBalance(userId, amount, null, true);
       return maxAllowedDeposit;
     } catch (error) {
-      throw error;
+      throw new HttpError(error.message, error.statusCode);
+    }
+  }
+
+  static validateAmount(amount) {
+    try {
+      if (typeof amount !== 'number' || isNaN(amount))
+        throw new HttpError(
+          'Amount must be a valid number',
+          HttpStatusCode.BAD_REQUEST
+        );
+
+      if (amount <= 0) {
+        throw new HttpError(
+          'Amount must be greater than zero',
+          HttpStatusCode.BAD_REQUEST
+        );
+      }
+    } catch (error) {
+      throw new HttpError(error.message, error.statusCode);
     }
   }
 }

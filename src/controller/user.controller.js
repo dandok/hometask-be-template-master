@@ -9,9 +9,9 @@ class UserController {
   async deposit(req, res, next) {
     const userId = req.profile.id;
     const { amount } = req.body;
-    await this.userService.deposit(userId, amount);
-
+    
     try {
+      await this.userService.deposit(userId, amount);
       res.json({
         statusCode: HttpStatusCode.OK,
         message: 'Deposit done successfully',

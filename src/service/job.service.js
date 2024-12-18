@@ -30,9 +30,7 @@ class JobService {
   }
 
   async payForJob(id, amount, userId) {
-    if (amount <= 0)
-      throw new HttpError('Amount must be greater than zero', 400);
-
+    JobService.validateAmount(amount);
     const transaction = await this.sequelize.transaction();
 
     try {
@@ -55,23 +53,25 @@ class JobService {
       if (clientProfile.balance < amount)
         throw new HttpError('Insufficient balance', HttpStatusCode.BAD_REQUEST);
 
-      await this.userService.updateClientBalance(
-        clientProfile.id,
-        amount,
-        transaction
-      );
-      await this.userService.updateContractorBalance(
-        contractorProfile.id,
-        amount,
-        transaction
-      );
+      await Promise.all([
+        this.userService.updateClientBalance(
+          clientProfile.id,
+          amount,
+          transaction
+        ),
+        this.userService.updateContractorBalance(
+          contractorProfile.id,
+          amount,
+          transaction
+        ),
+      ]);
 
       await updateJobStatusToPaid(job, transaction);
       await transaction.commit();
       return;
     } catch (error) {
       await transaction.rollback();
-      throw error;
+      throw new HttpError(error.message, error.statusCode);
     }
   }
 
@@ -140,11 +140,47 @@ class JobService {
       );
     }
 
-    if (start && end && new Date(start) > new Date(end)) {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    if (isNaN(startDate.getTime())) {
+      throw new HttpError(
+        `Invalid start date: ${start}`,
+        HttpStatusCode.BAD_REQUEST
+      );
+    }
+
+    if (isNaN(endDate.getTime())) {
+      throw new HttpError(
+        `Invalid end date: ${end}`,
+        HttpStatusCode.BAD_REQUEST
+      );
+    }
+
+    if (startDate > endDate) {
       throw new HttpError(
         'Start date cannot be later than end date',
         HttpStatusCode.BAD_REQUEST
       );
+    }
+  }
+
+  static validateAmount(amount) {
+    try {
+      if (typeof amount !== 'number' || isNaN(amount))
+        throw new HttpError(
+          'Amount must be a valid number',
+          HttpStatusCode.BAD_REQUEST
+        );
+
+      if (amount <= 0) {
+        throw new HttpError(
+          'Amount must be greater than zero',
+          HttpStatusCode.BAD_REQUEST
+        );
+      }
+    } catch (error) {
+      throw new HttpError(error.message, error.statusCode);
     }
   }
 }
