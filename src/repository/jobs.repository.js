@@ -92,14 +92,12 @@ async function sumOfClientActiveJobs(userId) {
 
 async function getBestProfession(startDate, endDate) {
   let whereClause = { paid: true };
-  let start = startDate ? new Date(startDate) : null;
-  let end = endDate ? new Date(endDate) : null;
-
-  if (start && end)
-    whereClause.paymentDate = { [Op.gte]: start, [Op.lte]: end };
+  if (startDate && endDate) {
+    whereClause.paymentDate = { [Op.gte]: startDate, [Op.lte]: endDate };
+  }
 
   try {
-    const result = await Job.findAll({
+    return Job.findAll({
       attributes: [
         [sequelize.fn('sum', sequelize.col('price')), 'totalEarnings'],
         [sequelize.col('Contract.ContractorId'), 'ContractorId'],
@@ -123,36 +121,22 @@ async function getBestProfession(startDate, endDate) {
       order: [[sequelize.fn('sum', sequelize.col('price')), 'DESC']],
       limit: 1,
     });
-
-    if (!result || !result.length)
-      throw new HttpError(
-        'No data found for the specified time range',
-        HttpStatusCode.NOT_FOUND
-      );
-
-    const bestProfession = result[0].dataValues.profession;
-    const totalEarnings = result[0].dataValues.totalEarnings;
-
-    return { profession: bestProfession, totalEarnings };
   } catch (error) {
-    if (error.message.includes('No data')) throw error;
     throw new HttpError(
       `Database Error: ${error.message}`,
-      HttpStatusCode.INTERNAL_SERVER_ERROR
+      HttpStatus.HTTP_INTERNAL_SERVER_ERROR
     );
   }
 }
 
 async function getBestClients(startDate, endDate, limit) {
-  let whereClause = { paid: true };
-  let start = startDate ? new Date(startDate) : null;
-  let end = endDate ? new Date(endDate) : null;
+  const whereClause = { paid: true };
 
   if (startDate && endDate)
-    whereClause.paymentDate = { [Op.gte]: start, [Op.lte]: end };
+    whereClause.paymentDate = { [Op.gte]: startDate, [Op.lte]: endDate };
 
   try {
-    const result = await Job.findAll({
+    return Job.findAll({
       attributes: [
         [sequelize.fn('sum', sequelize.col('price')), 'totalPayment'],
         [sequelize.col('Contract.ClientId'), 'ClientId'],
@@ -185,23 +169,10 @@ async function getBestClients(startDate, endDate, limit) {
       order: [[sequelize.fn('sum', sequelize.col('price')), 'DESC']],
       limit,
     });
-
-    if (!result || !result.length)
-      throw new HttpError(
-        'No data found for the specified time range',
-        HttpStatusCode.NOT_FOUND
-      );
-
-    return result.map((client) => ({
-      id: client.dataValues.ClientId,
-      fullName: client.dataValues.fullName,
-      paid: client.dataValues.totalPayment,
-    }));
   } catch (error) {
-    if (error.message.includes('No data')) throw error;
     throw new HttpError(
       `Database Error: ${error.message}`,
-      HttpStatusCode.INTERNAL_SERVER_ERROR
+      HttpStatus.HTTP_INTERNAL_SERVER_ERROR
     );
   }
 }

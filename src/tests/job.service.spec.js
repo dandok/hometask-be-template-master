@@ -171,13 +171,29 @@ describe('JobService', () => {
     it('should return the best profession for the given date range', async () => {
       const start = '2024-01-01';
       const end = '2024-12-31';
-      const bestProfession = { profession: 'Developer', totalJobs: 100 };
 
-      getBestProfession.mockResolvedValue(bestProfession);
+      const mockResult = [
+        {
+          dataValues: {
+            profession: 'Developer',
+            totalEarnings: 100000,
+          },
+        },
+      ];
+
+      getBestProfession.mockResolvedValue(mockResult);
 
       const result = await jobService.getBestProfession(start, end);
-      expect(result).toEqual(bestProfession);
-      expect(getBestProfession).toHaveBeenCalledWith(start, end);
+
+      expect(result).toEqual({
+        profession: 'Developer',
+        totalEarnings: 100000,
+      });
+
+      expect(getBestProfession).toHaveBeenCalledWith(
+        new Date(start),
+        new Date(end)
+      );
     });
 
     it('should throw an error if the start date is later than the end date', async () => {
@@ -200,13 +216,38 @@ describe('JobService', () => {
       const start = '2024-01-01';
       const end = '2024-12-31';
       const limit = 3;
-      const bestClients = [{ clientId: 1, totalJobs: 10 }];
 
-      getBestClients.mockResolvedValue(bestClients);
+      const mockResult = [
+        {
+          dataValues: {
+            ClientId: 1,
+            fullName: 'John Doe',
+            totalPayment: 1000,
+          },
+        },
+        {
+          dataValues: {
+            ClientId: 2,
+            fullName: 'Jane Smith',
+            totalPayment: 800,
+          },
+        },
+      ];
+
+      getBestClients.mockResolvedValue(mockResult);
 
       const result = await jobService.bestClients(start, end, limit);
-      expect(result).toEqual(bestClients);
-      expect(getBestClients).toHaveBeenCalledWith(start, end, 3);
+
+      expect(result).toEqual([
+        { id: 1, fullName: 'John Doe', paid: 1000 },
+        { id: 2, fullName: 'Jane Smith', paid: 800 },
+      ]);
+
+      expect(getBestClients).toHaveBeenCalledWith(
+        new Date(start),
+        new Date(end),
+        limit
+      );
     });
 
     it('should throw an error if the limit is invalid', async () => {

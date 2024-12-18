@@ -79,7 +79,17 @@ class JobService {
     JobService.validateRange(start, end);
 
     try {
-      return getBestProfession(start, end);
+      const result = await getBestProfession(new Date(start), new Date(end));
+
+      if (!result || result.length === 0) {
+        throw new HttpError(
+          'No data found for the specified time range',
+          HttpStatusCode.NOT_FOUND
+        );
+      }
+
+      const { profession, totalEarnings } = result[0].dataValues;
+      return { profession, totalEarnings };
     } catch (error) {
       throw error;
     }
@@ -90,7 +100,24 @@ class JobService {
     JobService.validateLimit(limit);
 
     try {
-      return getBestClients(start, end, parseInt(limit, 10));
+      const result = await getBestClients(
+        new Date(start),
+        new Date(end),
+        limit
+      );
+
+      if (!result || result.length === 0) {
+        throw new HttpError(
+          'No data found for the specified time range',
+          HttpStatusCode.NOT_FOUND
+        );
+      }
+
+      return result.map((client) => ({
+        id: client.dataValues.ClientId,
+        fullName: client.dataValues.fullName,
+        paid: client.dataValues.totalPayment,
+      }));
     } catch (error) {
       throw error;
     }
@@ -106,6 +133,13 @@ class JobService {
   }
 
   static validateRange(start, end) {
+    if (!start || !end) {
+      throw new HttpError(
+        'Both startDate and endDate are required',
+        HttpStatusCode.BAD_REQUEST
+      );
+    }
+
     if (start && end && new Date(start) > new Date(end)) {
       throw new HttpError(
         'Start date cannot be later than end date',
